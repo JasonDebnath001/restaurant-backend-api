@@ -56,7 +56,7 @@ const loginController = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
-    
+
     if (!user || !match)
       return res
         .status(200)
