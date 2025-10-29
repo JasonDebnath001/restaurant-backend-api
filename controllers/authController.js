@@ -12,12 +12,10 @@ const registerController = async (req, res) => {
     //check user
     const existingUser = await userModel.findOne({ email });
     if (existingUser)
-      res
-        .status(200)
-        .send({
-          success: false,
-          message: "Email already registered. Please login!",
-        });
+      res.status(200).send({
+        success: false,
+        message: "Email already registered. Please login!",
+      });
     //create new user
     const user = await userModel.create({
       username,
@@ -36,4 +34,26 @@ const registerController = async (req, res) => {
   }
 };
 
-module.exports = { registerController };
+const loginController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    //validation
+    if (!email || !password)
+      return res
+        .status(500)
+        .send({ success: false, message: "Please provide all fields." });
+    //check user
+    const user = await userModel.findOne({ email, password });
+    if (!user)
+      return res
+        .status(200)
+        .send({ success: true, message: "Invalid credentials!" });
+
+    res.status(200).send({ success: true, message: "Login successfully" });
+  } catch (error) {
+    console.log("Error logging in user" + error);
+    res.status(500).send({ success: false, message: error.message });
+  }
+};
+
+module.exports = { registerController, loginController };
