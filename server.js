@@ -15,6 +15,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.use("/api/v1/test", require("./routes/testRoute"));
+
 //port
 app.get("/", (req, res) => {
   return res.status(200).send("<h1>Welcome To Server App</h1>");
