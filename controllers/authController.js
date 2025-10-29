@@ -1,4 +1,6 @@
 const userModel = require("../models/userModel");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const registerController = async (req, res) => {
   try {
@@ -16,11 +18,15 @@ const registerController = async (req, res) => {
         success: false,
         message: "Email already registered. Please login!",
       });
+    // hashing
+    var salt = bcrypt.genSaltSync(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     //create new user
     const user = await userModel.create({
       username,
       email,
-      password,
+      password: hashedPassword,
       address,
       phone,
     });
@@ -42,14 +48,23 @@ const loginController = async (req, res) => {
       return res
         .status(500)
         .send({ success: false, message: "Please provide all fields." });
-    //check user
-    const user = await userModel.findOne({ email, password });
-    if (!user)
+    //check user and password
+    const user = await userModel.findOne({ email });
+    const match = await bcrypt.compare(password, user.password);
+
+    //token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    
+    if (!user || !match)
       return res
         .status(200)
         .send({ success: true, message: "Invalid credentials!" });
 
-    res.status(200).send({ success: true, message: "Login successfully" });
+    res
+      .status(200)
+      .send({ success: true, message: "Login successfully", token });
   } catch (error) {
     console.log("Error logging in user" + error);
     res.status(500).send({ success: false, message: error.message });
