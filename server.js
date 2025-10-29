@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use("/api/v1/test", require("./routes/testRoute"));
+app.use("/api/v1/auth", require("./routes/authRoutes"));
 
 //port
 app.get("/", (req, res) => {
